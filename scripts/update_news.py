@@ -132,8 +132,12 @@ def via_og(owner, pid):
     if not text and not img:
         raise RuntimeError("превью поста недоступно")
     saved = save_image(img, owner, pid)
+    date = ""
+    m = re.search(r'"date":\s*(\d{10})', page)
+    if m:  # дата публикации поста, по Москве
+        date = time.strftime("%Y-%m-%d", time.gmtime(int(m.group(1)) + 3 * 3600))
     return {
-        "id": pid, "owner": owner, "source": "vk", "url": post_url(owner, pid), "date": "",
+        "id": pid, "owner": owner, "source": "vk", "url": post_url(owner, pid), "date": date,
         "title": "", "text": text, "image": saved, "images": [saved] if saved else [],
     }
 
@@ -183,7 +187,7 @@ def main():
         if key in result:
             continue
         prev = old.get(key)
-        if prev and prev.get("text"):
+        if prev and prev.get("text") and prev.get("date"):
             result[key] = prev
             continue
         try:
