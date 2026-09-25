@@ -111,9 +111,10 @@
       var date = fmtDate(n.date);
       return '<div class="news">' +
         '<h4><a href="' + link + '">' + esc(titleOf(n)) + "</a></h4>" +
-        (date ? '<div class="date">' + date + "</div>" : "") +
         '<div class="body">' + (n.image ? '<a href="' + link + '"><img src="' + esc(n.image) + '" alt="" loading="lazy"></a>' : "") +
-        "<div><p>" + esc(short) + '</p><a class="more" href="' + link + '">Читать полностью</a></div></div>' +
+        "<div><p>" + esc(short) + "</p></div></div>" +
+        '<div class="news_foot"><a class="more" href="' + link + '">Читать полностью</a>' +
+        (date ? '<span class="news_date">' + date + "</span>" : "") + "</div>" +
         "</div>";
     }).join("");
   }
