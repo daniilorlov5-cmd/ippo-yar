@@ -1,0 +1,51 @@
+name: Обновление новостей и картинок
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/vk-links.txt"
+      - "scripts/**"
+      - ".github/workflows/update.yml"
+  schedule:
+    - cron: "0 */3 * * *"   # каждые 3 часа
+  workflow_dispatch:
+    inputs:
+      force_slider:
+        description: "Перекачать фото слайдера с Яндекс.Диска"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow
+      - name: Фон ippo.ru и слайдер с Яндекс.Диска
+        env:
+          FORCE_SLIDER: ${{ inputs.force_slider && '1' || '0' }}
+        run: python scripts/fetch_assets.py
+      - name: Новости из ВКонтакте
+        env:
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}
+        run: python scripts/update_news.py
+      - name: Сохранить изменения
+        run: |
+          git config user.name "site-bot"
+          git config user.email "site-bot@users.noreply.github.com"
+          git add -A img data
+          if git diff --cached --quiet; then echo "Изменений нет"; exit 0; fi
+          git commit -m "Автообновление: новости и картинки"
+          git pull --rebase
+          git push
