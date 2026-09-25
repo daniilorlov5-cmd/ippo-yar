@@ -1,11 +1,12 @@
 """Собирает новости сайта из постов ВКонтакте.
 
 Источники постов:
-  1. data/vk-links.txt — ссылки, добавленные вручную (по одной в строке).
+  1. data/vk-links.txt — ссылки, добавленные вручную или из админки (по одной в строке).
   2. Если задан секрет VK_TOKEN — ещё и последние записи со стены группы.
 
 Без токена текст и фото берутся из открытого превью поста (og-теги).
-С токеном — через VK API (полный текст, дата, фото в хорошем качестве).
+С токеном — через VK API (полный текст, дата, все фото).
+Новости, созданные или отредактированные в админке, скрипт не трогает.
 """
 import io, json, os, re, sys, time, html
 from pathlib import Path
@@ -16,6 +17,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 LINKS = ROOT / "data" / "vk-links.txt"
 OUT = ROOT / "data" / "news.json"
+HIDDEN = ROOT / "data" / "news-hidden.json"
 IMG_DIR = ROOT / "img" / "news"
 GROUP_ID = -234054681
 TOKEN = os.environ.get("VK_TOKEN", "").strip()
@@ -44,23 +46,33 @@ def post_url(owner, pid):
     return f"https://vk.ru/wall{owner}_{pid}"
 
 
-def save_image(url, owner, pid):
+def save_image(url, owner, pid, n=0):
     if not url:
         return ""
     IMG_DIR.mkdir(parents=True, exist_ok=True)
-    name = f"{abs(owner)}_{pid}.jpg"
+    name = f"{abs(owner)}_{pid}.jpg" if n == 0 else f"{abs(owner)}_{pid}_{n}.jpg"
     dst = IMG_DIR / name
     if not dst.exists():
         try:
             r = requests.get(url, headers=UA, timeout=30)
             r.raise_for_status()
             im = Image.open(io.BytesIO(r.content)).convert("RGB")
-            im.thumbnail((900, 900))
+            im.thumbnail((1600, 1600))
             im.save(dst, "JPEG", quality=82, optimize=True, progressive=True)
         except Exception as e:  # noqa
             print("Фото не скачалось:", url, e, file=sys.stderr)
             return ""
     return f"img/news/{name}"
+
+
+def all_photos(attachments):
+    out = []
+    for a in attachments or []:
+        if a.get("type") == "photo":
+            sizes = a["photo"].get("sizes") or []
+            if sizes:
+                out.append(max(sizes, key=lambda s: s.get("width", 0) * s.get("height", 0)).get("url", ""))
+    return [u for u in out if u][:12]
 
 
 def best_photo(attachments):
@@ -88,14 +100,19 @@ def from_api_item(p):
     text = p.get("text", "")
     if not text and p.get("copy_history"):
         text = p["copy_history"][0].get("text", "")
-    photo = best_photo(p.get("attachments")) or best_photo((p.get("copy_history") or [{}])[0].get("attachments"))
+    atts = p.get("attachments") or (p.get("copy_history") or [{}])[0].get("attachments")
+    urls = all_photos(atts) or [u for u in [best_photo(atts)] if u]
+    imgs = [x for x in (save_image(u, p["owner_id"], p["id"], i) for i, u in enumerate(urls)) if x]
     return {
         "id": p["id"],
         "owner": p["owner_id"],
+        "source": "vk",
         "url": post_url(p["owner_id"], p["id"]),
         "date": time.strftime("%Y-%m-%d", time.gmtime(p["date"])),
+        "title": "",
         "text": text.strip(),
-        "image": save_image(photo, p["owner_id"], p["id"]),
+        "image": imgs[0] if imgs else "",
+        "images": imgs,
     }
 
 
@@ -110,22 +127,33 @@ def via_og(owner, pid):
             re.search(r'<meta[^>]+content="([^"]*)"[^>]+property="%s"' % re.escape(prop), page)
         return html.unescape(m.group(1)).strip() if m else ""
 
-    text = meta("og:description")
+    text = re.sub(r"\s*\.{3}\s*Смотрите полностью ВКонтакте\.?\s*$", "…", meta("og:description")).strip()
     img = meta("og:image")
     if not text and not img:
         raise RuntimeError("превью поста недоступно")
+    saved = save_image(img, owner, pid)
     return {
-        "id": pid, "owner": owner, "url": post_url(owner, pid), "date": "",
-        "text": text, "image": save_image(img, owner, pid),
+        "id": pid, "owner": owner, "source": "vk", "url": post_url(owner, pid), "date": "",
+        "title": "", "text": text, "image": saved, "images": [saved] if saved else [],
     }
 
 
 def main():
     old = {}
+    manual = []
     if OUT.exists():
         try:
             for n in json.loads(OUT.read_text(encoding="utf-8")):
-                old[(n.get("owner", GROUP_ID), n["id"])] = n
+                if n.get("source") == "manual":
+                    manual.append(n)
+                else:
+                    old[(n.get("owner", GROUP_ID), n["id"])] = n
+        except Exception:
+            pass
+    hidden = set()
+    if HIDDEN.exists():
+        try:
+            hidden = set(str(x) for x in json.loads(HIDDEN.read_text(encoding="utf-8")))
         except Exception:
             pass
 
@@ -165,16 +193,22 @@ def main():
             if prev:
                 result[key] = prev
 
-    # Сохраняем вручную поправленные заголовки/даты
-    for key, n in result.items():
+    # Новости, отредактированные в админке, не перезаписываем
+    for key in list(result):
         prev = old.get(key) or {}
+        if prev.get("edited"):
+            result[key] = prev
+            continue
+        n = result[key]
         for f in ("title", "date"):
             if prev.get(f) and not n.get(f):
                 n[f] = prev[f]
-        if prev.get("title"):
-            n["title"] = prev["title"]
+    for key in list(result):
+        if f"{key[0]}_{key[1]}" in hidden:
+            del result[key]
 
-    items = sorted(result.values(), key=lambda n: (n.get("date") or "", n["id"]), reverse=True)
+    items = list(result.values()) + manual
+    items.sort(key=lambda n: (n.get("date") or "", str(n["id"]).zfill(20)), reverse=True)
     OUT.write_text(json.dumps(items, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"Новостей на сайте: {len(items)}")
 
