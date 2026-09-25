@@ -69,6 +69,7 @@ body {
 .content ul.sub li::before { content: "—"; }
 .content a { text-decoration: underline; }
 .content a:hover { color: #80201e; }
+.content img { max-width: 100%; height: auto; }
 .content .pic { display: block; max-width: 100%; margin: 5px 0 20px; }
 .content .pic_left { float: left; max-width: 45%; margin: 5px 25px 10px 0; }
 .content .pic_right { float: right; max-width: 45%; margin: 5px 0 10px 25px; }
