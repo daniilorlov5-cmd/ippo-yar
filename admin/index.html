@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Управление новостями — ИППО Ярославль</title>
+<link rel="icon" href="../img/logo.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>
+:root {
+  --red: #80201e; --red-h: #962a27; --cream: #fbf6e8; --panel: #f9f4ec; --line: #e0ad68;
+  --line-soft: #ecd7b6; --text: #503b0a; --muted: #8a7550; --ok: #3f7a3a; --err: #b3261e;
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: Roboto, Arial, sans-serif; background: var(--cream); color: var(--text); font-size: 15px; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+a { color: var(--red); }
+[hidden] { display: none !important; }
+
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; padding: 10px 20px; background: var(--red); color: #f9f4ec; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+.topbar img { width: 34px; height: 38px; object-fit: contain; }
+.topbar h1 { font-size: 16px; font-weight: 500; letter-spacing: .02em; }
+.topbar .sp { flex: 1; }
+.topbar a, .topbar button { color: #f9f4ec; font-size: 13px; text-decoration: none; padding: 7px 12px; border-radius: 6px; }
+.topbar a:hover, .topbar button:hover { background: rgba(255,255,255,.14); }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--radius); font-weight: 500; font-size: 14px; transition: background .15s, box-shadow .15s; }
+.btn-primary { background: var(--red); color: #fff; box-shadow: 0 2px 6px rgba(128,32,30,.35); }
+.btn-primary:hover { background: var(--red-h); }
+.btn-primary:disabled { opacity: .55; cursor: default; }
+.btn-ghost { border: 1px solid var(--line); background: #fff; }
+.btn-ghost:hover { background: var(--panel); }
+.btn-danger { color: var(--err); border: 1px solid #e8b4b0; background: #fff; }
+.btn-danger:hover { background: #fdf0ef; }
+.btn-sm { padding: 6px 10px; font-size: 13px; }
+
+.field { display: block; margin-bottom: 16px; }
+.field > span { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.field small { display: block; color: var(--muted); font-size: 12px; margin-top: 5px; }
+.input, .textarea { width: 100%; background: #fff; border: 1px solid var(--line-soft); border-radius: var(--radius); padding: 10px 12px; outline: none; transition: border-color .15s, box-shadow .15s; }
+.input:focus, .textarea:focus { border-color: var(--line); box-shadow: 0 0 0 3px rgba(224,173,104,.25); }
+.textarea { min-height: 260px; resize: vertical; line-height: 1.55; }
+.title-input { font-size: 20px; font-weight: 700; }
+
+/* Вход */
+.login { max-width: 460px; margin: 8vh auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 32px; box-shadow: 0 8px 30px rgba(80,59,10,.12); }
+.login .logo { display: block; margin: 0 auto 14px; width: 70px; }
+.login h2 { text-align: center; font-size: 20px; margin-bottom: 6px; }
+.login p.lead { text-align: center; color: var(--muted); margin-bottom: 22px; }
+.login details { margin-top: 18px; font-size: 13px; line-height: 1.55; }
+.login summary { cursor: pointer; color: var(--red); }
+.login ol { margin: 10px 0 0 18px; }
+.err { color: var(--err); font-size: 13px; margin-top: 10px; }
+
+/* Основной экран */
+.app { display: grid; grid-template-columns: 340px 1fr; min-height: calc(100vh - 58px); }
+.side { border-right: 1px solid var(--line-soft); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+.side-actions { padding: 14px; display: grid; gap: 8px; border-bottom: 1px solid var(--line-soft); }
+.side-actions .btn { justify-content: center; }
+.search { margin: 12px 14px 6px; }
+.list { overflow: auto; flex: 1; padding: 6px 8px 20px; }
+.item { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 8px; border-radius: var(--radius); cursor: pointer; align-items: center; }
+.item:hover { background: #fff; }
+.item.active { background: #fff; box-shadow: inset 3px 0 0 var(--red); }
+.item img, .item .noimg { width: 64px; height: 44px; object-fit: cover; border-radius: 5px; background: var(--line-soft); }
+.item b { display: block; font-size: 13px; font-weight: 500; line-height: 1.3; max-height: 2.6em; overflow: hidden; }
+.item .meta { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; gap: 6px; align-items: center; }
+.badge { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; padding: 1px 6px; border-radius: 10px; background: #e7eef8; color: #2d5a9a; }
+.badge.m { background: #f3e6d2; color: #7a5220; }
+
+.main { padding: 24px 28px 60px; min-width: 0; }
+.empty { max-width: 520px; margin: 12vh auto; text-align: center; color: var(--muted); line-height: 1.6; }
+.empty h2 { color: var(--text); font-size: 20px; margin-bottom: 8px; }
+
+.editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 28px; align-items: start; }
+.card { background: #fff; border: 1px solid var(--line-soft); border-radius: 12px; padding: 22px; }
+.editor-head { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.editor-head h2 { font-size: 18px; flex: 1; }
+.row { display: grid; grid-template-columns: 180px 1fr; gap: 14px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+.drop { border: 2px dashed var(--line); border-radius: 10px; padding: 18px; text-align: center; color: var(--muted); background: var(--panel); transition: background .15s, border-color .15s; cursor: pointer; }
+.drop.over { background: #fff3df; border-color: var(--red); color: var(--text); }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
+.ph { position: relative; aspect-ratio: 3/2; border-radius: 8px; overflow: hidden; border: 2px solid transparent; background: var(--line-soft); cursor: grab; }
+.ph.cover { border-color: var(--red); }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph .tag { position: absolute; left: 6px; top: 6px; background: var(--red); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+.ph .acts { position: absolute; right: 4px; bottom: 4px; display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+.ph:hover .acts, .ph:focus-within .acts { opacity: 1; }
+.ph .acts button { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,.92); font-size: 14px; line-height: 28px; }
+.ph .acts button:hover { background: #fff; }
+.ph.dragging { opacity: .4; }
+
+.preview { position: sticky; top: 78px; }
+.preview h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; display: flex; justify-content: space-between; }
+.preview iframe { width: 100%; height: 70vh; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--cream); }
+.seg { display: inline-flex; border: 1px solid var(--line-soft); border-radius: 6px; overflow: hidden; }
+.seg button { padding: 3px 10px; font-size: 11px; text-transform: none; letter-spacing: 0; }
+.seg button.on { background: var(--red); color: #fff; }
+
+/* Импорт из ВК */
+.modal-bg { position: fixed; inset: 0; background: rgba(40,25,10,.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+.modal { background: var(--cream); border-radius: 14px; padding: 26px; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+.modal h2 { font-size: 19px; margin-bottom: 6px; }
+.modal p { color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+.modal .foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.steps { list-style: none; margin: 14px 0 6px; }
+.steps li { display: flex; align-items: center; gap: 10px; padding: 7px 0; color: var(--muted); }
+.steps li::before { content: ""; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line-soft); flex: none; }
+.steps li.now { color: var(--text); }
+.steps li.now::before { border-color: var(--red); border-top-color: transparent; animation: spin .8s linear infinite; }
+.steps li.done { color: var(--ok); }
+.steps li.done::before { background: var(--ok); border-color: var(--ok); box-shadow: inset 0 0 0 3px #fff; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast { position: fixed; right: 20px; bottom: 20px; z-index: 60; background: var(--text); color: #fff; padding: 12px 16px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.25); max-width: 380px; line-height: 1.45; transform: translateY(20px); opacity: 0; transition: .25s; }
+.toast.show { transform: none; opacity: 1; }
+.toast.ok { background: var(--ok); }
+.toast.bad { background: var(--err); }
+.busy { position: fixed; inset: 0; background: rgba(251,246,232,.6); z-index: 70; display: flex; align-items: center; justify-content: center; font-weight: 500; gap: 12px; }
+.busy::before { content: ""; width: 22px; height: 22px; border: 3px solid var(--red); border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+
+@media (max-width: 1100px) { .editor { grid-template-columns: 1fr; } .preview { position: static; } .preview iframe { height: 520px; } }
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+  .side { border-right: none; border-bottom: 1px solid var(--line-soft); max-height: 45vh; }
+  .main { padding: 16px; }
+  .row { grid-template-columns: 1fr; }
+  .topbar h1 { font-size: 14px; }
+}
+:focus-visible { outline: 2px solid var(--line); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <img src="../img/logo.png" alt="">
+  <h1>ИППО Ярославль · новости сайта</h1>
+  <span class="sp"></span>
+  <a href="../news.html" target="_blank" rel="noopener">Открыть сайт</a>
+  <button id="logout" hidden>Выйти</button>
+</header>
+
+<!-- Вход -->
+<section id="login" class="login" hidden>
+  <img class="logo" src="../img/logo.png" alt="">
+  <h2>Вход в управление сайтом</h2>
+  <p class="lead">Введите ключ доступа. Он сохранится в этом браузере.</p>
+  <label class="field"><span>Ключ доступа (GitHub token)</span>
+    <input id="token" class="input" type="password" autocomplete="off" placeholder="github_pat_…">
+  </label>
+  <button id="loginBtn" class="btn btn-primary" style="width:100%;justify-content:center">Войти</button>
+  <div id="loginErr" class="err" hidden></div>
+  <details>
+    <summary>Где взять ключ</summary>
+    <ol>
+      <li>Войдите на github.com в аккаунт, у которого есть доступ к репозиторию сайта.</li>
+      <li>Откройте <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">создание ключа</a>.</li>
+      <li>Repository access → <b>Only select repositories</b> → ippo-yar.</li>
+      <li>Permissions → Repository permissions → <b>Contents: Read and write</b>.</li>
+      <li>Срок действия — год, нажмите Generate token и вставьте ключ сюда.</li>
+    </ol>
+  </details>
+</section>
+
+<!-- Приложение -->
+<div id="app" class="app" hidden>
+  <aside class="side">
+    <div class="side-actions">
+      <button id="newVk" class="btn btn-primary">Добавить по ссылке из ВКонтакте</button>
+      <button id="newManual" class="btn btn-ghost">Написать новость вручную</button>
+    </div>
+    <input id="search" class="input search" type="search" placeholder="Поиск по новостям">
+    <div id="list" class="list"></div>
+  </aside>
+
+  <main class="main">
+    <div id="empty" class="empty">
+      <h2>Выберите новость или создайте новую</h2>
+      <p>Вставьте ссылку на пост ВКонтакте — текст и фотографии подтянутся сами, останется проверить и сохранить. Или напишите новость вручную и загрузите фото: они автоматически приведутся к единому размеру, обложка обрежется под формат сайта.</p>
+    </div>
+
+    <div id="editor" class="editor" hidden>
+      <div class="card">
+        <div class="editor-head">
+          <h2 id="edTitle">Новость</h2>
+          <button id="delBtn" class="btn btn-danger btn-sm">Удалить</button>
+          <button id="saveBtn" class="btn btn-primary">Сохранить и опубликовать</button>
+        </div>
+
+        <label class="field"><span>Заголовок</span>
+          <input id="fTitle" class="input title-input" maxlength="160" placeholder="Коротко о событии">
+          <small>До 120 символов. Если оставить пустым, возьмётся первое предложение текста.</small>
+        </label>
+
+        <div class="row">
+          <label class="field"><span>Дата</span><input id="fDate" class="input" type="date"></label>
+          <label class="field"><span>Ссылка на пост ВК (необязательно)</span><input id="fUrl" class="input" placeholder="https://vk.ru/wall-234054681_…"></label>
+        </div>
+
+        <label class="field"><span>Текст</span>
+          <textarea id="fText" class="textarea" placeholder="Каждый абзац — с новой строки."></textarea>
+          <div class="tools">
+            <button id="cleanBtn" class="btn btn-ghost btn-sm" type="button">Привести текст к стилю сайта</button>
+            <button id="titleBtn" class="btn btn-ghost btn-sm" type="button">Заголовок из текста</button>
+          </div>
+          <small>«Привести к стилю» убирает эмодзи, хэштеги, лишние пробелы и пустые строки, ставит «ёлочки» вместо прямых кавычек.</small>
+        </label>
+
+        <div class="field"><span>Фотографии</span>
+          <div id="drop" class="drop" tabindex="0">Перетащите фото сюда или <u>выберите файлы</u><br><small>JPG, PNG, HEIC из телефона — всё приведётся к единому формату. Первое фото — обложка.</small></div>
+          <input id="file" type="file" accept="image/*" multiple hidden>
+          <div id="photos" class="photos"></div>
+        </div>
+      </div>
+
+      <div class="preview">
+        <h3>Как будет на сайте <span class="seg"><button id="pvCard" class="on">Карточка</button><button id="pvPage">Страница</button></span></h3>
+        <iframe id="pv" title="Предпросмотр"></iframe>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Импорт из ВК -->
+<div id="vkModal" class="modal-bg" hidden>
+  <div class="modal">
+    <h2>Новость из ВКонтакте</h2>
+    <p>Вставьте ссылку на пост группы. Робот заберёт текст и фотографии примерно за 1–3 минуты, после чего откроется редактор.</p>
+    <input id="vkUrl" class="input" placeholder="https://vk.com/wall-234054681_57">
+    <ul id="vkSteps" class="steps" hidden>
+      <li data-s="1">Ссылка отправлена роботу</li>
+      <li data-s="2">Робот забирает текст и фото из ВКонтакте</li>
+      <li data-s="3">Открываю в редакторе</li>
+    </ul>
+    <div id="vkErr" class="err" hidden></div>
+    <div class="foot">
+      <button id="vkCancel" class="btn btn-ghost">Закрыть</button>
+      <button id="vkGo" class="btn btn-primary">Загрузить</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="busy" class="busy" hidden><span id="busyText">Сохраняю…</span></div>
+
+<script>
+(function () {
+  "use strict";
+  var OWNER = "daniilorlov5-cmd", REPO = "ippo-yar", BRANCH = "main";
+  var NEWS = "data/news.json", LINKS = "data/vk-links.txt", HIDDEN = "data/news-hidden.json";
+  var RAW = "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + BRANCH + "/";
+  var TOKEN_KEY = "ippo_admin_token";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var token = localStorage.getItem(TOKEN_KEY) || "";
+  var news = [];
+  var cur = null;       // редактируемая новость
+  var photos = [];      // [{path, src, blob, isNew}]
+  var dirty = false;
+  var pvMode = "card";
+
+  // ---------- утилиты ----------
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function toast(msg, kind) {
+    var t = $("toast"); t.textContent = msg; t.className = "toast show " + (kind || "");
+    clearTimeout(toast._t); toast._t = setTimeout(function () { t.className = "toast"; }, kind === "bad" ? 7000 : 4000);
+  }
+  function busy(on, text) { $("busy").hidden = !on; if (text) $("busyText").textContent = text; }
+  function b64FromBytes(bytes) {
+    var s = "", ch = 0x8000;
+    for (var i = 0; i < bytes.length; i += ch) s += String.fromCharCode.apply(null, bytes.subarray(i, i + ch));
+    return btoa(s);
+  }
+  function b64FromText(t) { return b64FromBytes(new TextEncoder().encode(t)); }
+  function textFromB64(b) {
+    var bin = atob(b.replace(/\n/g, "")), u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(u);
+  }
+  function blobToB64(blob) {
+    return new Promise(function (res, rej) {
+      var r = new FileReader(); r.onload = function () { res(String(r.result).split(",")[1]); }; r.onerror = rej; r.readAsDataURL(blob);
+    });
+  }
+  function rnd() { return Math.random().toString(36).slice(2, 7); }
+  function today() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function fmtDate(d) {
+    if (!d) return "";
+    var dt = new Date(d + "T12:00:00");
+    return isNaN(dt) ? "" : dt.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+  }
+  function cleanVkTail(t) { return String(t || "").replace(/\s*\.{3}\s*Смотрите полностью ВКонтакте\.?\s*$/i, "…").trim(); }
+  function autoTitle(text) {
+    var t = cleanVkTail(text).split(/\n|(?<=[.!?])\s/)[0] || "";
+    t = t.replace(/…$/, "").trim();
+    return t.length > 110 ? t.slice(0, 107).replace(/\s+\S*$/, "") + "…" : t;
+  }
+  function styleText(t) {
+    t = cleanVkTail(t);
+    t = t.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}]/gu, "");
+    t = t.replace(/(^|\s)#[\wА-Яа-яЁё@_]+/g, "$1");
+    t = t.replace(/[ \t\u00A0]+/g, " ");
+    t = t.replace(/"([^"\n]*)"/g, "«$1»");
+    t = t.replace(/ - /g, " — ");
+    t = t.split(/\n/).map(function (l) { return l.trim(); }).filter(Boolean).join("\n");
+    return t.trim();
+  }
+  function keyOf(n) { return n.source === "manual" ? String(n.id) : String(n.owner || -234054681) + "_" + n.id; }
+  function isManual(n) { return n.source === "manual"; }
+  function imgUrl(p) { return /^(blob:|data:|https?:)/.test(p) ? p : RAW + p; }
+
+  // ---------- GitHub API ----------
+  function api(path, opts) {
+    opts = opts || {};
+    return fetch("https://api.github.com/repos/" + OWNER + "/" + REPO + path, {
+      method: opts.method || "GET",
+      cache: "no-store",
+      headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "Content-Type": "application/json" },
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function (r) {
+      if (r.status === 404 && opts.allow404) return null;
+      if (!r.ok) return r.text().then(function (t) { var e = new Error("GitHub " + r.status + ": " + t.slice(0, 200)); e.status = r.status; throw e; });
+      return r.status === 204 ? null : r.json();
+    });
+  }
+  function readText(path) {
+    return api("/contents/" + path + "?ref=" + BRANCH + "&t=" + Date.now(), { allow404: true })
+      .then(function (d) { return d ? textFromB64(d.content) : null; });
+  }
+  function readJSON(path, def) {
+    return readText(path).then(function (t) { try { return t ? JSON.parse(t) : def; } catch (e) { return def; } });
+  }
+  // files: [{path, text} | {path, b64} | {path, sha} | {path, del:true}]
+  function commit(files, message) {
+    var blobs = files.map(function (f) {
+      if (f.del || f.sha) return Promise.resolve(f);
+      return api("/git/blobs", { method: "POST", body: { content: f.b64 || b64FromText(f.text), encoding: "base64" } })
+        .then(function (b) { return { path: f.path, sha: b.sha }; });
+    });
+    return Promise.all(blobs).then(function (entries) {
+      return api("/git/ref/heads/" + BRANCH).then(function (ref) {
+        var head = ref.object.sha;
+        return api("/git/commits/" + head).then(function (c) {
+          return api("/git/trees", { method: "POST", body: {
+            base_tree: c.tree.sha,
+            tree: entries.map(function (e) { return { path: e.path, mode: "100644", type: "blob", sha: e.del ? null : e.sha }; })
+          } });
+        }).then(function (tree) {
+          return api("/git/commits", { method: "POST", body: { message: message, tree: tree.sha, parents: [head] } });
+        }).then(function (nc) {
+          return api("/git/refs/heads/" + BRANCH, { method: "PATCH", body: { sha: nc.sha, force: false } });
+        });
+      });
+    });
+  }
+  // Применяет изменение к свежей версии news.json и коммитит (с повтором, если робот успел закоммитить)
+  function saveNews(mutate, extra, message, attempt) {
+    attempt = attempt || 1;
+    return readJSON(NEWS, []).then(function (list) {
+      var out = mutate(list) || list;
+      var files = [{ path: NEWS, text: JSON.stringify(out, null, 1) + "\n" }].concat(extra || []);
+      return commit(files, message).then(function () { return out; });
+    }).catch(function (e) {
+      if (attempt >= 3 || (e.status !== 422 && e.status !== 409)) throw e;
+      // повтор: робот мог успеть закоммитить; со второй попытки не удаляем старые файлы
+      var next = attempt >= 2 && extra ? extra.filter(function (f) { return !f.del; }) : extra;
+      return saveNews(mutate, next, message, attempt + 1);
+    });
+  }
+
+  // ---------- изображения ----------
+  function loadBitmap(blob) {
+    if (window.createImageBitmap) return createImageBitmap(blob, { imageOrientation: "from-image" }).catch(function () { return loadImgEl(blob); });
+    return loadImgEl(blob);
+  }
+  function loadImgEl(blob) {
+    return new Promise(function (res, rej) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = rej; i.src = URL.createObjectURL(blob); });
+  }
+  function toJpeg(canvas, q) { return new Promise(function (res) { canvas.toBlob(res, "image/jpeg", q || 0.85); }); }
+  function resize(blob, maxSide) {
+    return loadBitmap(blob).then(function (img) {
+      var w = img.width, h = img.height, k = Math.min(1, maxSide / Math.max(w, h));
+      var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+      var x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(img, 0, 0, c.width, c.height);
+      return toJpeg(c, 0.85);
+    });
+  }
+  function makeCover(blob) {
+    return loadBitmap(blob).then(function (img) {
+      var W = 1200, H = 800, r = W / H, w = img.width, h = img.height, sw, sh;
+      if (w / h > r) { sh = h; sw = h * r; } else { sw = w; sh = w / r; }
+      var c = document.createElement("canvas"); c.width = W; c.height = H;
+      var x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+      x.drawImage(img, (w - sw) / 2, (h - sh) / 2, sw, sh, 0, 0, W, H);
+      return toJpeg(c, 0.84);
+    });
+  }
+  function fetchRepoImage(path) {
+    return fetch(RAW + path + "?t=" + Date.now()).then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+      .catch(function () {
+        return api("/contents/" + path + "?ref=" + BRANCH).then(function (d) {
+          var bin = atob(d.content.replace(/\n/g, "")), u = new Uint8Array(bin.length);
+          for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+          return new Blob([u], { type: "image/jpeg" });
+        });
+      });
+  }
+
+  // ---------- вход ----------
+  function showLogin(msg) {
+    $("login").hidden = false; $("app").hidden = true; $("logout").hidden = true;
+    if (msg) { $("loginErr").textContent = msg; $("loginErr").hidden = false; }
+  }
+  function tryLogin() {
+    busy(true, "Проверяю доступ…");
+    return api("").then(function (repo) {
+      if (!repo.permissions || !repo.permissions.push) throw new Error("У ключа нет права на запись в репозиторий.");
+      localStorage.setItem(TOKEN_KEY, token);
+      $("login").hidden = true; $("app").hidden = false; $("logout").hidden = false;
+      return loadNews();
+    }).catch(function (e) {
+      localStorage.removeItem(TOKEN_KEY);
+      showLogin(e.status === 401 ? "Ключ не подходит или истёк." : (e.message || "Не удалось войти."));
+    }).then(function () { busy(false); });
+  }
+  $("loginBtn").onclick = function () { token = $("token").value.trim(); if (token) tryLogin(); };
+  $("token").addEventListener("keydown", function (e) { if (e.key === "Enter") $("loginBtn").click(); });
+  $("logout").onclick = function () { localStorage.removeItem(TOKEN_KEY); token = ""; location.reload(); };
+
+  // ---------- список ----------
+  function sortNews(list) {
+    return list.slice().sort(function (a, b) {
+      return (b.date || "").localeCompare(a.date || "") || String(b.id).localeCompare(String(a.id), undefined, { numeric: true });
+    });
+  }
+  function loadNews() {
+    return readJSON(NEWS, []).then(function (list) { news = sortNews(list || []); renderList(); });
+  }
+  function renderList() {
+    var q = $("search").value.trim().toLowerCase();
+    var items = news.filter(function (n) { return !q || ((n.title || "") + " " + (n.text || "")).toLowerCase().indexOf(q) >= 0; });
+    $("list").innerHTML = items.length ? items.map(function (n) {
+      var t = n.title || autoTitle(n.text) || "Без заголовка";
+      var img = n.image ? '<img src="' + esc(imgUrl(n.image)) + '" alt="" loading="lazy">' : '<div class="noimg"></div>';
+      var act = cur && keyOf(cur) === keyOf(n) ? " active" : "";
+      return '<div class="item' + act + '" data-k="' + esc(keyOf(n)) + '">' + img + '<div><b>' + esc(t) + '</b><div class="meta">' +
+        (isManual(n) ? '<span class="badge m">вручную</span>' : '<span class="badge">ВК</span>') +
+        '<span>' + (fmtDate(n.date) || "без даты") + "</span></div></div></div>";
+    }).join("") : '<p style="padding:14px;color:var(--muted)">Новостей не найдено</p>';
+  }
+  $("search").addEventListener("input", renderList);
+  $("list").addEventListener("click", function (e) {
+    var el = e.target.closest(".item"); if (!el) return;
+    var n = news.filter(function (x) { return keyOf(x) === el.getAttribute("data-k"); })[0];
+    if (n && confirmLeave()) openEditor(n);
+  });
+  function confirmLeave() { return !dirty || confirm("Есть несохранённые изменения. Уйти без сохранения?"); }
+  window.addEventListener("beforeunload", function (e) { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+  // ---------- редактор ----------
+  function openEditor(n) {
+    cur = JSON.parse(JSON.stringify(n));
+    $("empty").hidden = true; $("editor").hidden = false;
+    $("edTitle").textContent = n._new ? "Новая новость" : "Редактирование";
+    $("delBtn").hidden = !!n._new;
+    $("fTitle").value = n.title || "";
+    $("fDate").value = n.date || (n._new ? today() : "");
+    $("fUrl").value = n.url || "";
+    $("fText").value = cleanVkTail(n.text || "");
+    var paths = (n.images && n.images.length) ? n.images.slice() : (n.image ? [n.image] : []);
+    photos = paths.map(function (p) { return { path: p, src: imgUrl(p) }; });
+    dirty = false;
+    renderPhotos(); renderList(); preview();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function newManual() {
+    if (!confirmLeave()) return;
+    openEditor({ _new: true, source: "manual", id: "m" + Date.now(), title: "", date: today(), text: "", images: [] });
+  }
+  $("newManual").onclick = newManual;
+
+  ["fTitle", "fDate", "fUrl", "fText"].forEach(function (id) {
+    $(id).addEventListener("input", function () { dirty = true; preview(); });
+  });
+  $("cleanBtn").onclick = function () { $("fText").value = styleText($("fText").value); dirty = true; preview(); toast("Текст приведён к стилю сайта"); };
+  $("titleBtn").onclick = function () { $("fTitle").value = autoTitle($("fText").value); dirty = true; preview(); };
+
+  // фото
+  function renderPhotos() {
+    $("photos").innerHTML = photos.map(function (p, i) {
+      return '<div class="ph' + (i === 0 ? " cover" : "") + '" draggable="true" data-i="' + i + '">' +
+        '<img src="' + esc(p.src) + '" alt="">' + (i === 0 ? '<span class="tag">обложка</span>' : "") +
+        '<div class="acts">' +
+        (i !== 0 ? '<button type="button" data-a="cover" title="Сделать обложкой">★</button>' : "") +
+        (i > 0 ? '<button type="button" data-a="left" title="Левее">←</button>' : "") +
+        (i < photos.length - 1 ? '<button type="button" data-a="right" title="Правее">→</button>' : "") +
+        '<button type="button" data-a="del" title="Убрать">✕</button></div></div>';
+    }).join("");
+  }
+  $("photos").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var i = +b.closest(".ph").getAttribute("data-i"), a = b.getAttribute("data-a");
+    if (a === "del") photos.splice(i, 1);
+    if (a === "cover") photos.unshift(photos.splice(i, 1)[0]);
+    if (a === "left") photos.splice(i - 1, 0, photos.splice(i, 1)[0]);
+    if (a === "right") photos.splice(i + 1, 0, photos.splice(i, 1)[0]);
+    dirty = true; renderPhotos(); preview();
+  });
+  var dragI = null;
+  $("photos").addEventListener("dragstart", function (e) { var el = e.target.closest(".ph"); if (!el) return; dragI = +el.getAttribute("data-i"); el.classList.add("dragging"); });
+  $("photos").addEventListener("dragover", function (e) { if (dragI !== null) e.preventDefault(); });
+  $("photos").addEventListener("drop", function (e) {
+    var el = e.target.closest(".ph"); if (dragI === null || !el) return; e.preventDefault();
+    var to = +el.getAttribute("data-i"); photos.splice(to, 0, photos.splice(dragI, 1)[0]); dragI = null;
+    dirty = true; renderPhotos(); preview();
+  });
+  $("photos").addEventListener("dragend", function () { dragI = null; renderPhotos(); });
+
+  function addFiles(files) {
+    var list = Array.prototype.filter.call(files, function (f) { return /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name); });
+    if (!list.length) return;
+    busy(true, "Обрабатываю фото…");
+    Promise.all(list.map(function (f) {
+      return resize(f, 1600).then(function (blob) { return { blob: blob, src: URL.createObjectURL(blob), isNew: true }; })
+        .catch(function () { toast("Не удалось открыть " + f.name + ". Сохраните его как JPG и попробуйте снова.", "bad"); return null; });
+    })).then(function (arr) {
+      arr.filter(Boolean).forEach(function (p) { photos.push(p); });
+      dirty = true; renderPhotos(); preview();
+    }).then(function () { busy(false); });
+  }
+  var drop = $("drop");
+  drop.onclick = function () { $("file").click(); };
+  drop.onkeydown = function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } };
+  $("file").onchange = function () { addFiles(this.files); this.value = ""; };
+  ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { if (dragI === null) { e.preventDefault(); drop.classList.add("over"); } }); });
+  ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function (e) { if (dragI === null) { e.preventDefault(); addFiles(e.dataTransfer.files); } });
+
+  // предпросмотр
+  $("pvCard").onclick = function () { pvMode = "card"; this.classList.add("on"); $("pvPage").classList.remove("on"); preview(); };
+  $("pvPage").onclick = function () { pvMode = "page"; this.classList.add("on"); $("pvCard").classList.remove("on"); preview(); };
+  function preview() {
+    if (!cur) return;
+    var title = $("fTitle").value.trim() || autoTitle($("fText").value) || "Заголовок новости";
+    var text = $("fText").value.trim();
+    var date = fmtDate($("fDate").value);
+    var cover = photos[0] ? photos[0].src : "";
+    var body;
+    if (pvMode === "card") {
+      var short = text.replace(/\n+/g, " "); if (short.length > 300) short = short.slice(0, 297).replace(/\s+\S*$/, "") + "…";
+      body = '<div class="news" style="margin:20px"><h4><a href="#">' + esc(title) + "</a></h4>" + (date ? '<div class="date">' + date + "</div>" : "") +
+        '<div class="body">' + (cover ? '<img src="' + esc(cover) + '" alt="">' : "") + "<div><p>" + esc(short) + '</p><a class="more" href="#">Читать полностью</a></div></div></div>';
+    } else {
+      body = '<div class="content article" style="margin:0;border:none"><h1>' + esc(title) + "</h1>" + (date ? '<div class="article_date">' + date + "</div>" : "") +
+        (cover ? '<img class="article_cover" src="' + esc(cover) + '" alt="">' : "") +
+        '<div class="article_text">' + text.split(/\n+/).filter(Boolean).map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("") + "</div>" +
+        (photos.length > 1 ? '<div class="gallery">' + photos.map(function (p) { return '<a><img src="' + esc(p.src) + '" alt=""></a>'; }).join("") + "</div>" : "") + "</div>";
+    }
+    $("pv").srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><base href="' + location.origin + '/"><link rel="stylesheet" href="' + location.origin + '/css/style.css"><link rel="stylesheet" href="' + location.origin + '/css/news.css">' +
+      '<style>body{min-width:0!important;background:#fbf6e8!important}.news{width:auto!important}</style></head><body>' + body + "</body></html>";
+  }
+
+  // сохранение
+  $("saveBtn").onclick = function () {
+    if (!cur) return;
+    var text = $("fText").value.trim();
+    if (!text && !$("fTitle").value.trim()) { toast("Добавьте заголовок или текст новости", "bad"); return; }
+    busy(true, "Готовлю фото…");
+    var id = cur.id, base = "img/news/" + (isManual(cur) ? id : Math.abs(cur.owner || 0) + "_" + id);
+    var extra = [];
+    var oldPaths = [].concat(cur.images || [], cur.image ? [cur.image] : []);
+
+    // новые фото -> файлы
+    var jobs = photos.map(function (p, i) {
+      if (!p.isNew) return Promise.resolve(p.path);
+      var path = base + "-" + rnd() + ".jpg";
+      return blobToB64(p.blob).then(function (b64) { extra.push({ path: path, b64: b64 }); p.path = path; p.isNew = false; return path; });
+    });
+    Promise.all(jobs).then(function (paths) {
+      if (!photos.length) return { paths: paths, cover: "" };
+      var isGenerated = cur.image && /-cover-[a-z0-9]+\.jpg$/.test(cur.image);
+      if (isGenerated && cur.coverFrom === paths[0]) return { paths: paths, cover: cur.image };
+      var src = photos[0].blob ? Promise.resolve(photos[0].blob) : fetchRepoImage(photos[0].path);
+      return src.then(makeCover).then(blobToB64).then(function (b64) {
+        var cp = base + "-cover-" + rnd() + ".jpg"; extra.push({ path: cp, b64: b64 }); return { paths: paths, cover: cp };
+      });
+    }).then(function (res) {
+      var keep = res.paths.concat(res.cover ? [res.cover] : []);
+      oldPaths.filter(function (p, i, a) { return a.indexOf(p) === i && keep.indexOf(p) < 0 && /^img\/news\//.test(p); })
+        .forEach(function (p) { extra.push({ path: p, del: true }); });
+      var item = {
+        id: cur.id, source: isManual(cur) ? "manual" : "vk",
+        title: $("fTitle").value.trim(), date: $("fDate").value, text: text,
+        image: res.cover, images: res.paths, coverFrom: res.paths[0] || ""
+      };
+      if (!isManual(cur)) { item.owner = cur.owner || -234054681; item.edited = true; }
+      var url = $("fUrl").value.trim(); if (url) item.url = url;
+      busy(true, "Публикую…");
+      return saveNews(function (list) {
+        var k = keyOf(item), found = false;
+        list = list.map(function (n) { if (keyOf(n) === k) { found = true; return item; } return n; });
+        if (!found) list.push(item);
+        return sortNews(list);
+      }, extra, (cur._new ? "Новость: " : "Правка новости: ") + (item.title || autoTitle(text)).slice(0, 60));
+    }).then(function (list) {
+      news = list; dirty = false;
+      var saved = news.filter(function (n) { return keyOf(n) === keyOf(cur); })[0];
+      if (saved) openEditor(saved);
+      toast("Сохранено. На сайте появится через 1–3 минуты, после обновления Timeweb.", "ok");
+    }).catch(function (e) {
+      console.error(e); toast("Не сохранилось: " + e.message, "bad");
+    }).then(function () { busy(false); });
+  };
+
+  // удаление
+  $("delBtn").onclick = function () {
+    if (!cur || !confirm("Удалить новость с сайта? Это действие нельзя отменить из админки.")) return;
+    busy(true, "Удаляю…");
+    var k = keyOf(cur);
+    var files = [].concat(cur.images || [], cur.image ? [cur.image] : [])
+      .filter(function (p, i, a) { return a.indexOf(p) === i && /^img\/news\//.test(p); })
+      .map(function (p) { return { path: p, del: true }; });
+    var chain = Promise.resolve();
+    if (!isManual(cur)) {
+      chain = Promise.all([readText(LINKS), readJSON(HIDDEN, [])]).then(function (r) {
+        var re = new RegExp("wall" + String(cur.owner || -234054681).replace("-", "\\-") + "_" + cur.id + "(?!\\d)");
+        var links = (r[0] || "").split("\n").filter(function (l) { return !re.test(l); }).join("\n");
+        var hidden = r[1] || []; if (hidden.indexOf(k) < 0) hidden.push(k);
+        files.push({ path: LINKS, text: links.replace(/\n*$/, "\n") }, { path: HIDDEN, text: JSON.stringify(hidden) + "\n" });
+      });
+    }
+    chain.then(function () {
+      return saveNews(function (list) { return list.filter(function (n) { return keyOf(n) !== k; }); }, files, "Удаление новости");
+    }).then(function (list) {
+      news = sortNews(list); cur = null; dirty = false;
+      $("editor").hidden = true; $("empty").hidden = false; renderList();
+      toast("Новость удалена", "ok");
+    }).catch(function (e) { toast("Не удалось удалить: " + e.message, "bad"); }).then(function () { busy(false); });
+  };
+
+  // ---------- импорт из ВК ----------
+  var vkTimer = null;
+  $("newVk").onclick = function () {
+    if (!confirmLeave()) return;
+    $("vkUrl").value = ""; $("vkErr").hidden = true; $("vkSteps").hidden = true; $("vkGo").disabled = false; $("vkUrl").disabled = false;
+    $("vkModal").hidden = false; setTimeout(function () { $("vkUrl").focus(); }, 50);
+  };
+  $("vkCancel").onclick = function () { clearInterval(vkTimer); $("vkModal").hidden = true; };
+  $("vkUrl").addEventListener("keydown", function (e) { if (e.key === "Enter") $("vkGo").click(); });
+  function step(n) {
+    $("vkSteps").querySelectorAll("li").forEach(function (li) {
+      var s = +li.getAttribute("data-s"); li.className = s < n ? "done" : (s === n ? "now" : "");
+    });
+  }
+  function vkError(msg) { $("vkErr").textContent = msg; $("vkErr").hidden = false; $("vkGo").disabled = false; $("vkUrl").disabled = false; }
+  $("vkGo").onclick = function () {
+    var m = $("vkUrl").value.match(/wall(-?\d+)_(\d+)/);
+    if (!m) { vkError("Не похоже на ссылку на пост. Нужна ссылка вида vk.com/wall-234054681_57"); return; }
+    var owner = +m[1], pid = +m[2], k = owner + "_" + pid;
+    $("vkErr").hidden = true; $("vkGo").disabled = true; $("vkUrl").disabled = true;
+    var exist = news.filter(function (n) { return keyOf(n) === k; })[0];
+    if (exist) { $("vkModal").hidden = true; openEditor(exist); toast("Эта новость уже есть на сайте — открыл её"); return; }
+    $("vkSteps").hidden = false; step(1);
+    Promise.all([readText(LINKS), readJSON(HIDDEN, [])]).then(function (r) {
+      var links = (r[0] || "").replace(/\n*$/, "\n") + "https://vk.ru/wall" + owner + "_" + pid + "\n";
+      var hidden = (r[1] || []).filter(function (x) { return x !== k; });
+      return commit([{ path: LINKS, text: links }, { path: HIDDEN, text: JSON.stringify(hidden) + "\n" }], "Новость из ВК: wall" + owner + "_" + pid);
+    }).then(function () {
+      step(2);
+      var started = Date.now();
+      vkTimer = setInterval(function () {
+        readJSON(NEWS, []).then(function (list) {
+          var n = (list || []).filter(function (x) { return keyOf(x) === k; })[0];
+          if (n) {
+            clearInterval(vkTimer); step(3);
+            news = sortNews(list);
+            setTimeout(function () {
+              $("vkModal").hidden = true; openEditor(n);
+              if (!n.date) $("fDate").value = today();
+              if (!n.title) $("fTitle").value = autoTitle(n.text);
+              $("fText").value = styleText(n.text);
+              dirty = true; preview();
+              toast("Пост загружен. Проверьте заголовок, дату и текст, затем нажмите «Сохранить».", "ok");
+            }, 500);
+          } else if (Date.now() - started > 6 * 60 * 1000) {
+            clearInterval(vkTimer);
+            vkError("Робот не успел забрать пост за 6 минут. Проверьте, что пост открыт для всех, и посмотрите статус во вкладке Actions репозитория. Ссылка сохранена — новость появится, как только робот отработает.");
+          }
+        }).catch(function () {});
+      }, 10000);
+    }).catch(function (e) { vkError("Не удалось отправить ссылку: " + e.message); });
+  };
+
+  // ---------- старт ----------
+  if (token) tryLogin(); else showLogin();
+})();
+</script>
+</body>
+</html>
