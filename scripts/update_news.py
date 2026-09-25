@@ -65,6 +65,27 @@ def save_image(url, owner, pid, n=0):
     return f"img/news/{name}"
 
 
+def download_list(urls, owner, pid):
+    """Скачивает фото поста по прямым ссылкам (поле photo_urls, заполняется вручную/из админки)."""
+    out = []
+    IMG_DIR.mkdir(parents=True, exist_ok=True)
+    for i, u in enumerate(urls):
+        name = f"{abs(owner)}_{pid}_v{i}.jpg"
+        dst = IMG_DIR / name
+        if not dst.exists():
+            try:
+                r = requests.get(u, headers=UA, timeout=60)
+                r.raise_for_status()
+                im = Image.open(io.BytesIO(r.content)).convert("RGB")
+                im.thumbnail((1600, 1600))
+                im.save(dst, "JPEG", quality=82, optimize=True, progressive=True)
+            except Exception as e:  # noqa
+                print("Фото не скачалось:", u[:80], e, file=sys.stderr)
+                continue
+        out.append(f"img/news/{name}")
+    return out
+
+
 def all_photos(attachments):
     out = []
     for a in attachments or []:
@@ -210,6 +231,17 @@ def main():
     for key in list(result):
         if f"{key[0]}_{key[1]}" in hidden:
             del result[key]
+
+    # Фото по прямым ссылкам (photo_urls) -> в репозиторий
+    for n in list(result.values()) + manual:
+        urls = n.get("photo_urls")
+        if not urls:
+            continue
+        imgs = download_list(urls, n.get("owner", GROUP_ID), n["id"])
+        if imgs:
+            n["images"] = imgs
+            n["image"] = imgs[0]
+            n.pop("photo_urls", None)
 
     items = list(result.values()) + manual
     items.sort(key=lambda n: (n.get("date") or "", str(n["id"]).zfill(20)), reverse=True)
