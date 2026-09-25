@@ -1,0 +1,172 @@
+/* Ярославское региональное отделение ИППО.
+   Вёрстка повторяет иппо-пенза.рф, фон — с ippo.ru */
+
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400&display=swap");
+
+* { margin: 0; padding: 0; box-sizing: border-box; list-style: none; text-decoration: none; border: none; }
+a, span, b, i, p { color: inherit; }
+
+html { background: #fbf6e8; }
+body {
+  min-width: 960px;
+  font-family: Roboto, Arial, sans-serif;
+  color: #503b0a;
+  background: #fbf6e8 url("../img/bg.png") center top repeat-y;
+  overflow-x: hidden;
+}
+
+.page { position: relative; min-height: 100vh; padding-bottom: 185px; }
+.center { position: relative; width: 960px; margin: 0 auto; padding-top: 1px; }
+
+/* ---------- Шапка ---------- */
+.main_top { position: relative; max-width: 1200px; min-width: 960px; height: 250px; margin: 0 auto 32px; }
+.main_header {
+  position: absolute; top: 0; left: 0; width: 100%; height: 200px;
+  background: url("../img/bg-header.png") center top / cover no-repeat;
+}
+.main_header .center { padding: 0; display: flex; align-items: flex-start; }
+.main_header .logo { flex: 0 0 104px; height: 115px; margin-top: 12px; background: url("../img/logo.png") left center / contain no-repeat; }
+.main_header .titles { padding: 12px 0 0 26px; }
+.main_header .title_img { display: block; width: 520px; height: auto; }
+.main_header .chair { display: block; padding-top: 10px; font-size: 14px; color: #503b0a; }
+
+.main_menu_con { position: absolute; left: 0; bottom: 20px; width: 100%; height: 52px; z-index: 2; }
+.main_menu {
+  width: 960px; height: 52px; margin: 0 auto;
+  background: #80201e; box-shadow: 0 3px 10px rgba(0,0,0,.7);
+  display: flex; justify-content: center;
+}
+.main_menu li { color: #f9f4ec; font-size: 13px; line-height: 52px; text-transform: uppercase; transition: .2s; }
+.main_menu li a { display: block; padding: 0 22px; }
+.main_menu li:hover { background: rgba(255,255,255,.15); }
+.main_menu li.active { background: #8d8381; }
+.openmenu { display: none; }
+
+/* ---------- Слайдер ---------- */
+.main_slider2 { position: relative; max-width: 980px; min-width: 960px; height: 366px; margin: 0 auto 32px; background: #000; overflow: hidden; }
+.main_slider2 .image { position: absolute; inset: 0; opacity: 0; transition: opacity 1s; background: center / cover no-repeat; }
+.main_slider2 .image.active { opacity: 1; }
+.main_slider2 .dots { position: absolute; left: 0; right: 0; bottom: 14px; z-index: 3; text-align: center; }
+.main_slider2 .dots button { width: 11px; height: 11px; margin: 0 4px; border-radius: 50%; background: rgba(249,244,236,.55); cursor: pointer; }
+.main_slider2 .dots button.active { background: #f9f4ec; }
+
+/* ---------- Контент ---------- */
+.content { position: relative; width: 100%; background: #f9f4ec; border: 1px solid #e0ad68; padding: 35px 35px 25px; margin-bottom: 32px; }
+.content h1 { font-size: 22px; font-weight: 700; margin-bottom: 35px; }
+.content h2 { font-size: 20px; font-weight: 700; margin: 30px 0 15px; }
+.content h3 { font-size: 17px; font-weight: 700; margin: 22px 0 10px; }
+.content p { font-size: 16px; line-height: 1.5; margin-bottom: 12px; }
+.content ul { margin: 0 0 14px; }
+.content li { position: relative; font-size: 16px; line-height: 1.5; padding-left: 22px; margin-bottom: 6px; }
+.content li::before { content: "✠"; position: absolute; left: 0; top: 0; color: #80201e; font-size: 13px; }
+.content ul.sub li::before { content: "—"; }
+.content a { text-decoration: underline; }
+.content a:hover { color: #80201e; }
+.content .pic { display: block; max-width: 100%; margin: 5px 0 20px; }
+.content .pic_left { float: left; max-width: 45%; margin: 5px 25px 10px 0; }
+.content .pic_right { float: right; max-width: 45%; margin: 5px 0 10px 25px; }
+.content .caption { font-size: 13px; font-style: italic; margin-top: -12px; margin-bottom: 20px; }
+.clear::after { content: ""; display: block; clear: both; }
+
+.quote { font-size: 20px; font-style: italic; text-align: center; color: #80201e; margin-bottom: 22px; }
+.quote small { display: block; margin-top: 4px; font-size: 13px; color: #503b0a; }
+.btn {
+  display: inline-block; margin-top: 10px; padding: 0 26px; line-height: 44px;
+  background: #80201e; color: #f9f4ec !important; font-size: 13px; text-transform: uppercase;
+  text-decoration: none !important; box-shadow: 0 3px 10px rgba(0,0,0,.35); transition: .2s;
+}
+.btn:hover { background: #962a27; }
+.intro { text-align: center; }
+.intro p { text-align: left; }
+.intro .quote { text-align: center; }
+
+/* ---------- Главная: две колонки ---------- */
+.columns { display: flex; align-items: flex-start; }
+.main_sidebar { flex: 0 0 295px; }
+.main_content { flex: 1; padding: 0 0 0 20px; }
+.main_content > h3, .news_title { font-size: 30px; font-weight: 700; text-align: center; margin-bottom: 30px; text-transform: uppercase; }
+
+.side_block { background: #f9f4ec; border: 1px solid #e0ad68; padding: 20px; margin-bottom: 20px; text-align: center; }
+.side_block img { display: block; width: 110px; margin: 0 auto 12px; }
+.side_block h4 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.side_block p { font-size: 14px; line-height: 1.5; }
+.side_block a { text-decoration: underline; }
+.side_link { display: block; background: #80201e; color: #f9f4ec; text-transform: uppercase; font-size: 13px; line-height: 1.35; padding: 16px 18px; margin-bottom: 20px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,.35); transition: .2s; }
+.side_link:hover { background: #962a27; }
+
+/* ---------- Новости ---------- */
+.news { background: #f9f4ec; border: 1px solid #e0ad68; padding: 20px; margin-bottom: 20px; }
+.news:last-child { margin-bottom: 0; }
+.news h4 { font-size: 20px; font-weight: 700; padding-bottom: 20px; text-decoration: underline; }
+.news h4 a:hover { color: #80201e; }
+.news .date { font-size: 13px; margin: -12px 0 12px; opacity: .8; }
+.news .body { display: flex; align-items: flex-start; }
+.news .body img { flex: 0 0 150px; width: 150px; height: 101px; object-fit: cover; margin-right: 20px; }
+.news .body p { font-size: 14px; line-height: 1.5; }
+.news .more { display: inline-block; margin-top: 12px; font-size: 14px; text-decoration: underline; }
+.news_page .news { width: 100%; }
+.news_empty { text-align: center; font-size: 16px; padding: 30px 0; }
+
+/* ---------- Руководство ---------- */
+.person { display: flex; align-items: flex-start; gap: 35px; padding: 30px 0; border-bottom: 1px solid #e0ad68; }
+.person:first-of-type { padding-top: 0; }
+.person:last-child { border-bottom: none; padding-bottom: 0; }
+.person img { flex: 0 0 220px; width: 220px; height: 260px; object-fit: cover; object-position: center top; border: 1px solid #e0ad68; padding: 5px; background: #fff; }
+.person .role { font-size: 14px; text-transform: uppercase; color: #80201e; margin-bottom: 8px; }
+.person .name { font-size: 22px; font-weight: 700; margin-bottom: 14px; }
+.person p { margin-bottom: 4px; }
+
+/* ---------- Деятельность ---------- */
+.direction { padding-top: 10px; }
+.direction img { display: block; width: 100%; max-height: 420px; object-fit: cover; margin: 5px 0 20px; }
+
+/* ---------- Контакты ---------- */
+.contacts p { font-size: 18px; margin-bottom: 16px; }
+.contacts b { display: inline-block; min-width: 190px; }
+
+/* ---------- Подвал ---------- */
+.footer { position: absolute; left: 0; bottom: 0; width: 100%; background: #80201e; padding: 30px 0; color: #f9f4ec; }
+.footer .center { display: flex; justify-content: space-between; align-items: center; padding: 0; }
+.footer .f_left { width: 330px; font-size: 13px; line-height: 1.5; }
+.footer .f_left i { display: block; margin-bottom: 6px; }
+.footer_menu { display: flex; flex-wrap: wrap; justify-content: flex-end; width: 610px; }
+.footer_menu li { font-size: 11px; line-height: 30px; text-transform: uppercase; transition: .2s; }
+.footer_menu li a { display: block; padding: 0 9px; }
+.footer_menu li:hover { background: rgba(255,255,255,.15); }
+.footer_menu li.active { background: #8d8381; }
+.footer .copy { width: 100%; font-size: 11px; opacity: .75; margin-top: 12px; text-align: right; }
+
+a:focus-visible, button:focus-visible { outline: 2px solid #e0ad68; outline-offset: 2px; }
+
+/* ---------- Мобильная версия ---------- */
+@media (max-width: 980px) {
+  body { min-width: 0; background-size: 200% auto; }
+  .center, .main_menu { width: auto; margin: 0 12px; }
+  .main_top { min-width: 0; height: auto; margin-bottom: 20px; }
+  .main_header { position: relative; height: auto; padding-bottom: 12px; }
+  .main_header .logo { flex-basis: 64px; height: 72px; }
+  .main_header .titles { padding-left: 12px; }
+  .main_header .title_img { width: 100%; max-width: 520px; }
+  .main_header .chair { font-size: 12px; }
+  .main_menu_con { position: relative; bottom: auto; height: auto; }
+  .main_menu { height: auto; flex-direction: column; display: none; }
+  .main_menu.open { display: flex; }
+  .main_menu li { line-height: 44px; border-top: 1px solid rgba(255,255,255,.12); }
+  .openmenu { display: block; margin: 0 12px; background: #80201e; color: #f9f4ec; width: calc(100% - 24px); line-height: 46px; font-size: 13px; text-transform: uppercase; cursor: pointer; }
+  .main_slider2 { min-width: 0; height: 56vw; margin: 0 12px 20px; }
+  .content { padding: 22px 18px 16px; }
+  .content .pic_left, .content .pic_right { float: none; max-width: 100%; margin: 5px 0 15px; }
+  .columns { flex-direction: column-reverse; }
+  .main_sidebar { flex: none; width: 100%; }
+  .main_content { padding: 0; width: 100%; margin-bottom: 20px; }
+  .main_content > h3, .news_title { font-size: 24px; }
+  .news .body { flex-direction: column; }
+  .news .body img { width: 100%; height: auto; margin: 0 0 12px; }
+  .person { flex-direction: column; gap: 18px; }
+  .page { padding-bottom: 0; }
+  .footer { position: static; }
+  .footer .center { flex-direction: column; gap: 14px; }
+  .footer .f_left, .footer_menu { width: 100%; justify-content: flex-start; }
+  .footer .copy { text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) { .main_slider2 .image { transition: none; } }
