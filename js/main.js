@@ -105,7 +105,7 @@
 
   function titleOf(n) {
     if (n.title) return n.title;
-    var t = cleanText(n.text).split(/\n|(?<=[.!?])\s/)[0] || "Новость отделения";
+    var t = cleanText(n.text).split(/\n|(?<=[а-яёa-z»)]{3}[.!?])\s+(?=[А-ЯЁA-Z«"\d])/)[0] || "Новость отделения";
     t = t.replace(/…$/, "");
     return t.length > 110 ? t.slice(0, 107).replace(/\s+\S*$/, "") + "…" : t;
   }
