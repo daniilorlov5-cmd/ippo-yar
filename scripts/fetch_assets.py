@@ -88,8 +88,59 @@ def fetch_slider():
         out.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
+def diagnose():
+    """Временная диагностика домена (запускается роботом, пишет data/diag.json)."""
+    import socket, ssl, json as _j
+    out = {}
+    for name in ("ippoyar.ru", "www.ippoyar.ru"):
+        for t in ("NS", "A", "AAAA", "CNAME"):
+            for srv in ("https://dns.google/resolve", "https://cloudflare-dns.com/dns-query"):
+                try:
+                    r = requests.get(srv, params={"name": name, "type": t}, headers={"accept": "application/dns-json"}, timeout=15).json()
+                    out[f"{srv.split('/')[2]} {name} {t}"] = {"Status": r.get("Status"), "Answer": [a.get("data") for a in r.get("Answer", [])], "Authority": [a.get("data") for a in r.get("Authority", [])]}
+                except Exception as e:
+                    out[f"{srv.split('/')[2]} {name} {t}"] = str(e)
+    for ns in ("ns1.timeweb.ru", "ns2.timeweb.ru", "ns3.timeweb.org", "ns4.timeweb.org"):
+        try:
+            import subprocess
+            out["dig @" + ns] = subprocess.run(["dig", "+norec", "+short", "@" + ns, "ippoyar.ru", "A"], capture_output=True, text=True, timeout=20).stdout.strip() or "(пусто)"
+            out["dig SOA @" + ns] = subprocess.run(["dig", "+norec", "@" + ns, "ippoyar.ru", "SOA"], capture_output=True, text=True, timeout=20).stdout[-600:]
+        except Exception as e:
+            out["dig @" + ns] = repr(e)
+    try:
+        s = socket.create_connection(("whois.tcinet.ru", 43), timeout=15); s.sendall(b"ippoyar.ru\r\n")
+        buf = b""
+        while True:
+            d = s.recv(4096)
+            if not d: break
+            buf += d
+        out["whois"] = buf.decode("utf-8", "replace")[-1500:]
+    except Exception as e:
+        out["whois"] = str(e)
+    for url in ("http://ippoyar.ru/", "https://ippoyar.ru/", "https://www.ippoyar.ru/", "https://daniilorlov5-cmd-ippo-yar-913e.twc1.net/"):
+        try:
+            r = requests.get(url, timeout=20, allow_redirects=False)
+            out[url] = {"status": r.status_code, "headers": dict(r.headers), "body": r.text[:400]}
+        except Exception as e:
+            out[url] = repr(e)[:400]
+    try:
+        ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE
+        with socket.create_connection(("ippoyar.ru", 443), timeout=15) as sock:
+            with ctx.wrap_socket(sock, server_hostname="ippoyar.ru") as ss:
+                der = ss.getpeercert(binary_form=True)
+                out["cert_der_len"] = len(der)
+        out["cert_verified"] = "?"
+        ctx2 = ssl.create_default_context()
+        with socket.create_connection(("ippoyar.ru", 443), timeout=15) as sock:
+            with ctx2.wrap_socket(sock, server_hostname="ippoyar.ru") as ss:
+                c = ss.getpeercert(); out["cert"] = {"subject": c.get("subject"), "issuer": c.get("issuer"), "notAfter": c.get("notAfter"), "san": c.get("subjectAltName")}
+    except Exception as e:
+        out["cert_error"] = repr(e)[:400]
+    (ROOT / "data" / "diag.json").write_text(_j.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
 if __name__ == "__main__":
-    for step in (fetch_backgrounds, fetch_slider):
+    for step in (diagnose, fetch_backgrounds, fetch_slider):
         try:
             step()
         except Exception as e:
