@@ -11,7 +11,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 IMG = ROOT / "img"
-YADISK = os.environ.get("YADISK_URL", "https://disk.yandex.ru/d/yNURkvisEZJ3XA")
+YADISK = os.environ.get("YADISK_URL", "https://disk.yandex.ru/d/WOpXanmdKpNRww")
 UA = {"User-Agent": "Mozilla/5.0 (site asset sync)"}
 
 BG = {
@@ -56,7 +56,12 @@ def fetch_slider():
     if current and os.environ.get("FORCE_SLIDER") != "1":
         return
     files = sorted(list_disk(), key=lambda f: f["name"])
+    if not files:
+        print("в папке Яндекс.Диска нет фото", file=sys.stderr)
+        return
     (IMG / "slider").mkdir(parents=True, exist_ok=True)
+    for old in (IMG / "slider").glob("*.jpg"):  # убираем фото прошлой папки
+        old.unlink()
     result = []
     for i, f in enumerate(files, 1):
         url = f.get("file")
