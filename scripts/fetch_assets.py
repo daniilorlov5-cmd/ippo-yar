@@ -88,40 +88,8 @@ def fetch_slider():
         out.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
-def diagnose():
-    """Временная проверка домена (пишет data/diag.json)."""
-    import json as _j
-    out = {}
-    for name in ("ippoyar.ru", "www.ippoyar.ru"):
-        for srv in ("https://dns.google/resolve", "https://cloudflare-dns.com/dns-query"):
-            try:
-                r = requests.get(srv, params={"name": name, "type": "A"}, headers={"accept": "application/dns-json"}, timeout=15).json()
-                out[srv.split("/")[2] + " " + name] = {"Status": r.get("Status"), "Answer": [a.get("data") for a in r.get("Answer", [])]}
-            except Exception as e:
-                out[srv.split("/")[2] + " " + name] = str(e)
-    import subprocess
-    def dig(*a):
-        try:
-            return subprocess.run(["dig"] + list(a), capture_output=True, text=True, timeout=25).stdout
-        except Exception as e:
-            return repr(e)
-    t = dig("+norec", "@a.dns.ripn.net", "ippoyar.ru", "NS")
-    out["ripn NS (делегирование в зоне .ru)"] = [l for l in t.splitlines() if "IN\tNS" in l or "status" in l]
-    out["ripn DS"] = [l for l in dig("+norec", "@a.dns.ripn.net", "ippoyar.ru", "DS").splitlines() if "DS" in l or "status" in l]
-    out["google DS"] = requests.get("https://dns.google/resolve", params={"name": "ippoyar.ru", "type": "DS"}, timeout=15).json()
-    out["google A cd=1 (без DNSSEC)"] = requests.get("https://dns.google/resolve", params={"name": "ippoyar.ru", "type": "A", "cd": "1"}, timeout=15).json()
-    out["dig trace"] = dig("+trace", "ippoyar.ru", "A")[-1500:]
-    for url in ("http://ippoyar.ru/", "https://ippoyar.ru/", "https://www.ippoyar.ru/"):
-        try:
-            r = requests.get(url, timeout=20, allow_redirects=False)
-            out[url] = {"status": r.status_code, "server": r.headers.get("Server"), "location": r.headers.get("Location"), "body": r.text[:120]}
-        except Exception as e:
-            out[url] = repr(e)[:300]
-    (ROOT / "data" / "diag.json").write_text(_j.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-
-
 if __name__ == "__main__":
-    for step in (diagnose, fetch_backgrounds, fetch_slider):
+    for step in (fetch_backgrounds, fetch_slider):
         try:
             step()
         except Exception as e:
