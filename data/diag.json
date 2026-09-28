@@ -1,0 +1,105 @@
+{
+ "dns.google ippoyar.ru NS": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com ippoyar.ru NS": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google ippoyar.ru A": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com ippoyar.ru A": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google ippoyar.ru AAAA": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com ippoyar.ru AAAA": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google ippoyar.ru CNAME": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com ippoyar.ru CNAME": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google www.ippoyar.ru NS": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com www.ippoyar.ru NS": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google www.ippoyar.ru A": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com www.ippoyar.ru A": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google www.ippoyar.ru AAAA": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com www.ippoyar.ru AAAA": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dns.google www.ippoyar.ru CNAME": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "cloudflare-dns.com www.ippoyar.ru CNAME": {
+  "Status": 2,
+  "Answer": [],
+  "Authority": []
+ },
+ "dig @ns1.timeweb.ru": "(пусто)",
+ "dig SOA @ns1.timeweb.ru": "\n; <<>> DiG 9.18.39-0ubuntu0.24.04.7-Ubuntu <<>> +norec @ns1.timeweb.ru ippoyar.ru SOA\n; (2 servers found)\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: REFUSED, id: 468\n;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 1232\n;; QUESTION SECTION:\n;ippoyar.ru.\t\t\tIN\tSOA\n\n;; Query time: 214 msec\n;; SERVER: 85.193.93.93#53(ns1.timeweb.ru) (UDP)\n;; WHEN: Mon Sep 28 14:43:51 UTC 2026\n;; MSG SIZE  rcvd: 39\n\n",
+ "dig @ns2.timeweb.ru": "(пусто)",
+ "dig SOA @ns2.timeweb.ru": "\n; <<>> DiG 9.18.39-0ubuntu0.24.04.7-Ubuntu <<>> +norec @ns2.timeweb.ru ippoyar.ru SOA\n; (2 servers found)\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: REFUSED, id: 51289\n;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 1232\n;; QUESTION SECTION:\n;ippoyar.ru.\t\t\tIN\tSOA\n\n;; Query time: 129 msec\n;; SERVER: 85.193.93.85#53(ns2.timeweb.ru) (UDP)\n;; WHEN: Mon Sep 28 14:43:52 UTC 2026\n;; MSG SIZE  rcvd: 39\n\n",
+ "dig @ns3.timeweb.org": "(пусто)",
+ "dig SOA @ns3.timeweb.org": "\n; <<>> DiG 9.18.39-0ubuntu0.24.04.7-Ubuntu <<>> +norec @ns3.timeweb.org ippoyar.ru SOA\n; (2 servers found)\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: REFUSED, id: 47166\n;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 1232\n;; QUESTION SECTION:\n;ippoyar.ru.\t\t\tIN\tSOA\n\n;; Query time: 125 msec\n;; SERVER: 217.78.234.130#53(ns3.timeweb.org) (UDP)\n;; WHEN: Mon Sep 28 14:43:52 UTC 2026\n;; MSG SIZE  rcvd: 39\n\n",
+ "dig @ns4.timeweb.org": "(пусто)",
+ "dig SOA @ns4.timeweb.org": "\n; <<>> DiG 9.18.39-0ubuntu0.24.04.7-Ubuntu <<>> +norec @ns4.timeweb.org ippoyar.ru SOA\n; (2 servers found)\n;; global options: +cmd\n;; Got answer:\n;; ->>HEADER<<- opcode: QUERY, status: REFUSED, id: 4735\n;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1\n\n;; OPT PSEUDOSECTION:\n; EDNS: version: 0, flags:; udp: 1232\n;; QUESTION SECTION:\n;ippoyar.ru.\t\t\tIN\tSOA\n\n;; Query time: 115 msec\n;; SERVER: 139.45.249.139#53(ns4.timeweb.org) (UDP)\n;; WHEN: Mon Sep 28 14:43:53 UTC 2026\n;; MSG SIZE  rcvd: 39\n\n",
+ "whois": "% TCI Whois Service. Terms of use:\n% https://tcinet.ru/documents/whois_ru_rf.pdf (in Russian)\n% https://tcinet.ru/documents/whois_su.pdf (in Russian)\n\ndomain:        IPPOYAR.RU\nnserver:       ns1.reg.ru.\nnserver:       ns2.reg.ru.\nstate:         REGISTERED, DELEGATED, VERIFIED\nperson:        Private Person\nregistrar:     REGRU-RU\nadmin-contact: http://www.reg.ru/whois/admin_contact\ncreated:       2026-09-25T13:05:16Z\npaid-till:     2027-09-25T13:05:16Z\nfree-date:     2027-10-26\nsource:        TCI\n\nLast updated on 2026-09-28T14:43:01Z\n\n",
+ "http://ippoyar.ru/": "ConnectionError(MaxRetryError('HTTPConnectionPool(host=\\'ippoyar.ru\\', port=80): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPConnection(host=\\'ippoyar.ru\\', port=80): Failed to resolve \\'ippoyar.ru\\' ([Errno -3] Temporary failure in name resolution)\"))'))",
+ "https://ippoyar.ru/": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'ippoyar.ru\\', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host=\\'ippoyar.ru\\', port=443): Failed to resolve \\'ippoyar.ru\\' ([Errno -3] Temporary failure in name resolution)\"))'))",
+ "https://www.ippoyar.ru/": "ConnectionError(MaxRetryError('HTTPSConnectionPool(host=\\'www.ippoyar.ru\\', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host=\\'www.ippoyar.ru\\', port=443): Failed to resolve \\'www.ippoyar.ru\\' ([Errno -3] Temporary failure in name resolution)\"))'))",
+ "https://daniilorlov5-cmd-ippo-yar-913e.twc1.net/": {
+  "status": 404,
+  "headers": {
+   "Alt-Svc": "h3=\":443\"; ma=2592000",
+   "Server": "Caddy",
+   "Date": "Mon, 28 Sep 2026 14:44:25 GMT",
+   "Content-Length": "0"
+  },
+  "body": ""
+ },
+ "cert_error": "gaierror(-3, 'Temporary failure in name resolution')"
+}
