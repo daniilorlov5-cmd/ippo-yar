@@ -100,11 +100,13 @@ def diagnose():
                     out[f"{srv.split('/')[2]} {name} {t}"] = {"Status": r.get("Status"), "Answer": [a.get("data") for a in r.get("Answer", [])], "Authority": [a.get("data") for a in r.get("Authority", [])]}
                 except Exception as e:
                     out[f"{srv.split('/')[2]} {name} {t}"] = str(e)
-    for ns in ("ns1.timeweb.ru", "ns2.timeweb.ru", "ns3.timeweb.org", "ns4.timeweb.org"):
+    import time as _t; _t.sleep(120)
+    for ns in ("ns1.reg.ru", "ns2.reg.ru"):
         try:
             import subprocess
             out["dig @" + ns] = subprocess.run(["dig", "+norec", "+short", "@" + ns, "ippoyar.ru", "A"], capture_output=True, text=True, timeout=20).stdout.strip() or "(пусто)"
-            out["dig SOA @" + ns] = subprocess.run(["dig", "+norec", "@" + ns, "ippoyar.ru", "SOA"], capture_output=True, text=True, timeout=20).stdout[-600:]
+            out["dig www @" + ns] = subprocess.run(["dig", "+norec", "+short", "@" + ns, "www.ippoyar.ru", "A"], capture_output=True, text=True, timeout=20).stdout.strip() or "(пусто)"
+            out["dig status @" + ns] = [l for l in subprocess.run(["dig", "+norec", "@" + ns, "ippoyar.ru", "A"], capture_output=True, text=True, timeout=20).stdout.splitlines() if "status" in l]
         except Exception as e:
             out["dig @" + ns] = repr(e)
     try:
@@ -117,7 +119,7 @@ def diagnose():
         out["whois"] = buf.decode("utf-8", "replace")[-1500:]
     except Exception as e:
         out["whois"] = str(e)
-    for url in ("http://ippoyar.ru/", "https://ippoyar.ru/", "https://www.ippoyar.ru/", "https://daniilorlov5-cmd-ippo-yar-913e.twc1.net/"):
+    for url in ("http://ippoyar.ru/", "https://ippoyar.ru/", "https://www.ippoyar.ru/", "https://daniilorlov5-cmd-ippo-yar-913e.twc1.net/", "https://daniilorlov5-cmd-ippo-yar-913e.twc1.net/index.html", "https://daniilorlov5-cmd-ippo-yar-913e.twc1.net/css/style.css"):
         try:
             r = requests.get(url, timeout=20, allow_redirects=False)
             out[url] = {"status": r.status_code, "headers": dict(r.headers), "body": r.text[:400]}
